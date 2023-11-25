@@ -13,6 +13,8 @@ class Product {
     required this.unitType,
     required this.quantity,
     required this.price,
+    this.productId,
+    this.bagId,
   });
 
   // Convert a Product into a Map. The keys must correspond to the names of the
@@ -33,13 +35,13 @@ class Product {
   // names of the columns in the database.
   factory Product.fromMap(Map<String, dynamic> map) {
     return Product(
-     // productId: map['product_id'],
+      productId: map['product_id'],
       name: map['name'],
       perUnitPrice: map['per_unit_price'],
       unitType: map['unit_type'],
       quantity: map['quantity'],
       price: map['price'],
-     // bagId: map['bag_id'],
+      bagId: map['bag_id'],
     );
   }
 }

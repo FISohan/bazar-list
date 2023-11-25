@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:bazar_list/Models/Bag.dart';
 import 'package:bazar_list/Models/product.dart';
 import 'package:bazar_list/Services/db_service.dart';
@@ -39,12 +41,14 @@ class HomeScreen extends StatelessWidget {
                     quantity: 30,
                     price: 9000,
                   ),
-                  // Add more products as needed
                 ];
                 Bag b = new Bag( createTime: 'createTime', products: products);
                await dbService.createNewBag(b);
               }, child: Text("add")),
-              ElevatedButton(onPressed: (){}, child: Text("get")),
+              ElevatedButton(onPressed: () async {
+                var d = await dbService.getAllBag();
+                log(">>>${d.length}");
+              }, child: Text("get")),
             ],
           ),
         ),

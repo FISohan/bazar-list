@@ -7,6 +7,7 @@ class Bag {
   Bag({
     required this.createTime,
     required this.products,
+    this.bagId
   });
 
   Map<String, dynamic> toMap() {
@@ -19,7 +20,7 @@ class Bag {
 
   factory Bag.fromMap(Map<String, dynamic> map) {
     return Bag(
-      //bagId:map['bagId']!,
+      bagId:map['bagId']!,
       createTime: map['create_time'],
       products: map['products']
     );

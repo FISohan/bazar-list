@@ -68,11 +68,11 @@ class DbService {
     }
   }
 
-  Future<List<Bag?>> getAllBag() async {
-    late List<Bag?> bags;
+  Future<List<Map<String,dynamic>>> getAllBag() async {
+    late List<Map<String,dynamic>> bags;
     try{
       final Database _db = await db;
-      bags = await _db.query(_bagTableName) as List<Bag?>;
+      bags = await _db.query(_bagTableName);
     }catch(err){
       Future.error("Failed to retrieve data.ERR:$err");
     }
