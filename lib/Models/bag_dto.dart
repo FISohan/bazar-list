@@ -1,15 +1,13 @@
 import 'package:bazar_list/Models/product.dart';
 
-class Bag {
+class BagDto {
   int? bagId;
   final String createTime;
   final int totalCost;
-  final List<Product>products;
-  Bag( {
+  BagDto( {
     required this.createTime,
-    required this.products,
     required this.totalCost,
-    this.bagId
+    required this.bagId
   });
 
   Map<String, dynamic> toMap() {
@@ -20,12 +18,11 @@ class Bag {
     };
   }
 
-  factory Bag.fromMap(Map<String, dynamic> map) {
-    return Bag(
-      bagId:map['bag_id'],
-      createTime: map['create_time'],
-      totalCost: map['total_cost'],
-      products: map['products']
+  factory BagDto.fromMap(Map<String, dynamic> map) {
+    return BagDto(
+        bagId:map['bag_id'],
+        createTime: map['create_time'],
+        totalCost: map['total_cost'],
     );
   }
 }

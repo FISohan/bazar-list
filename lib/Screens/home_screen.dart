@@ -1,56 +1,41 @@
 import 'dart:developer';
 
-import 'package:bazar_list/Models/Bag.dart';
-import 'package:bazar_list/Models/product.dart';
-import 'package:bazar_list/Services/db_service.dart';
+import 'package:bazar_list/Models/bag_dto.dart';
+import 'package:bazar_list/Provider/bag_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../Models/product.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({Key? key}) : super(key: key);
-
   @override
-  Widget build(BuildContext context) {
-    DbService dbService = DbService();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final AsyncValue<List<BagDto>> bags = ref.watch(getAllBagProvider);
+    final AsyncValue<List<Product>> p = ref.watch(getProductByBagIdProvider(1));
     return MaterialApp(
-
       home: Scaffold(
-        body: Center(
-          child: Row(
-            children: [
-              ElevatedButton(onPressed: () async {
-                List<Product> products = [
-                  Product(
-                    name: 'Product 1',
-                    perUnitPrice: 100,
-                    unitType: 'Type 1',
-                    quantity: 10,
-                    price: 1000,
-                  ),
-                  Product(
-                    name: 'Product 2',
-                    perUnitPrice: 200,
-                    unitType: 'Type 2',
-                    quantity: 20,
-                    price: 4000,
-                  ),
-                  Product(
-                    name: 'Product 3',
-                    perUnitPrice: 300,
-                    unitType: 'Type 3',
-                    quantity: 30,
-                    price: 9000,
-                  ),
-                ];
-                Bag b = new Bag( createTime: 'createTime', products: products);
-               await dbService.createNewBag(b);
-              }, child: Text("add")),
-              ElevatedButton(onPressed: () async {
-                var d = await dbService.getAllBag();
-                log(">>>${d.length}");
-              }, child: Text("get")),
-            ],
-          ),
+        body: SingleChildScrollView(
+          child: switch (bags) {
+            AsyncData(:final value) => Column(
+                children: [
+                  for (BagDto bag in value)
+                    Text('>>${bag.totalCost.toString()}'),
+                ],
+              ),
+            AsyncError() => const Center(
+                child: Text(
+                    "Something unexpected happened while retrieve all bags"),
+              ),
+            _ => const Center(
+                child: CircularProgressIndicator(),
+              ),
+          },
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+
+          },
+          child: Text("Add"),
         ),
       ),
     );

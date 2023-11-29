@@ -3,17 +3,22 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:bazar_list/Models/Bag.dart';
+import 'package:bazar_list/Models/bag_dto.dart';
+import 'package:bazar_list/Models/product.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DbService {
-  Future<Database> get db async {
-    Database db;
+  DbService._();
+  static final DbService instance = DbService._();
+
+  factory DbService() => instance;
+
+  Future<Database> get database async {
     try {
-      db = await init();
+      return await init();
     } catch (err) {
       return Future.error("Database init failed.ERR:$err");
     }
-    return db;
   }
 
   static const String _bagTableName = "bag";
@@ -22,7 +27,8 @@ class DbService {
     const bagTableCreateQuery = '''
        CREATE TABLE bag (
           bag_id INTEGER PRIMARY KEY AUTOINCREMENT ,
-          create_time TEXT
+          create_time TEXT,
+          total_cost INTEGER
        )
     ''';
     try {
@@ -68,16 +74,35 @@ class DbService {
     }
   }
 
-  Future<List<Map<String,dynamic>>> getAllBag() async {
-    late List<Map<String,dynamic>> bags;
-    try{
-      final Database _db = await db;
+  Future<List<BagDto>> getAllBag() async {
+    List<Map<String, dynamic>> bags;
+    try {
+      final Database _db = await DbService.instance.database;
       bags = await _db.query(_bagTableName);
-    }catch(err){
-      Future.error("Failed to retrieve data.ERR:$err");
+      await _db.close();
+    } catch (err) {
+      return Future.error("Failed to retrieve data.ERR:$err");
     }
-    return bags;
+
+    var _bags =
+        List.generate(bags.length, (index) => BagDto.fromMap(bags[index]));
+    return _bags;
   }
+
+  Future<List<Product>> getProductByBag(int bagId) async {
+    late final List<Map<String, dynamic>> products;
+    try {
+      Database _db = await DbService.instance.database;
+      products = await _db
+          .query(_productTableName, where: 'bag_id = ?', whereArgs: [bagId]);
+      log("Fetch ${products.length} products..");
+    } catch (err) {
+      return Future.error("Can't retrieve products;Err:: $err");
+    }
+    return List.generate(
+        products.length, (index) => Product.fromMap(products[index]));
+  }
+
   Future<Database> init() async {
     final String directory = await getDatabasesPath();
     final String dbPath = '${directory}bazaarList.db';
@@ -91,9 +116,8 @@ class DbService {
 
   Future<void> createNewBag(Bag newBag) async {
     try {
-      final Database _db = await db;
-      int bagId = await _db.insert(
-          _bagTableName, {'create_time': DateTime.now().toString()},
+      final Database _db = await DbService.instance.database;
+      int bagId = await _db.insert(_bagTableName, newBag.toMap(),
           conflictAlgorithm: ConflictAlgorithm.replace);
       await Future.wait([
         for (int i = 0; i < newBag.products.length; i++)
